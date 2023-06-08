@@ -5,8 +5,10 @@
 # Contact: ktlisfo@gmail.com
 
 # REPLACE THIS as your github.io structure
+
 data_folder_path='./data'
 
+cd './WEB'
 # git add, commit, push
 git fetch
 git add $data_folder_path/*
