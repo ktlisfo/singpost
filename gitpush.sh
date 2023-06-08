@@ -11,5 +11,5 @@ data_folder_path='./data'
 git fetch
 git add $data_folder_path/*
 #git add *
-#git commit -m "file is uploaded(auto) : `date +'%Y-%m-%d %H:%M'`"
-#git push
+git commit -m "file is uploaded(auto) : `date +'%Y-%m-%d %H:%M'`"
+git push
