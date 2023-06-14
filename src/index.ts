@@ -125,7 +125,7 @@ function generateDataElements(fname:string, carList:Set<string>) {
               //car link
               const link = document.createElement('a');
               link.className = 'tree-nav__item';
-              link.href = BASE_URL + 'fname=' + fname + '&car_id=' + carNum;
+              link.href = BASE_URL + 'fname=' + fname.replace(".json","") + '&car_id=' + carNum;
               link.textContent = carNum;//차량 번호 추가
               div.appendChild(link);
             });
