@@ -12,8 +12,8 @@ const fname = urlParams.get("fname")+".json";
 // "car_id" 매개변수의 값을 가져오기
 const carId = urlParams.get("car_id");
 
-console.log("fname: " + fname); // "20230530_1"
-console.log("carID : " + carId); // "CA03"
+console.log("fname: " + fname); // ex) "20230530_1"
+console.log("carID : " + carId); // ex) "CA03"
 
 
 interface Coordinate {
