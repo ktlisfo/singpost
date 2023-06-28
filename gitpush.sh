@@ -10,7 +10,7 @@ data_folder_path='./data'
 
 cd './WEB'
 # git add, commit, push
-git fetch
+git pull
 git add $data_folder_path/*
 #git add *
 git commit -m "file is uploaded(auto) : `date +'%Y-%m-%d %H:%M'`"
