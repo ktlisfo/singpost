@@ -17,16 +17,4 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    {
-      name: "copy-json",
-      async writeBundle() {
-        const fs = await import("fs");
-        const path = await import("path");
-        const fromPath = path.resolve(__dirname, "data/input-data/20230530_1.json");
-        const toPath = path.resolve(__dirname, "dist", "20230530_1.json");
-        fs.copyFileSync(fromPath, toPath);
-      },
-    },
-  ],
 });
