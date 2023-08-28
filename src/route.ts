@@ -211,7 +211,7 @@ function createContent(data: OrderData): string {
   <strong>- Items: </strong>${data.box_num}<br>
   <strong>- Total Weight: </strong>${data.order_volume}<br>
   <strong>- Requested time from: </strong>${data.open_time}<br>
-  <strong>- Request time to: </strong>${data.close_time}<br>
+  <strong>- Requested time to: </strong>${data.close_time}<br>
   `;
 
   return contentFormat;
