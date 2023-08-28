@@ -63,7 +63,7 @@ async function initMap(): Promise<void> {
   const infoWindow = new google.maps.InfoWindow(); // infoWindow 생성
 
   try {
-    const list = await readJSON(`/singpost-route/data/input-data/${fname}`);
+    const list = await readJSON(`/singpost/data/input-data/${fname}`);
     if (list.length > 0) {
       displayRoute(list, map, infoWindow); // infoWindow 전달
     } else {
