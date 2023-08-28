@@ -126,7 +126,8 @@ function displayRoute(list: OrderData[], map: google.maps.Map, infoWindow: googl
       directionsRenderer.setDirections(response);
       list.forEach((orderData, index) => { // 수정된 부분
         const label = index === 0 ? "A" : alphabetLabels[index];
-        const marker = createMarker(list, label, index, map); // 수정된 부분
+        const markerColor = getArrivalTimePeriod(list[index].arrival_time);
+        const marker = createMarker(list, label, index, map, markerColor); // 수정된 부분
         const content = createContent(orderData); // 수정된 부분
 
         marker.addListener('click', () => {
@@ -144,23 +145,61 @@ function createMarker(
   orderDataList: OrderData[],
   label: string,
   index: number,
-  map: google.maps.Map
+  map: google.maps.Map,
+  timePeriodColor: number
 ): google.maps.Marker {
   const zIndex = index === 0 ? orderDataList.length : orderDataList.length - index;
+  const markerColor = getMarkerColor(timePeriodColor);
+
+  console.log(label);
+  
   const marker = new google.maps.Marker({
     position: new google.maps.LatLng(orderDataList[index].latitude, orderDataList[index].longitude),
     map: map,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: markerColor,
+      fillOpacity: 1,
+      strokeWeight: 2,
+      scale: 10, // 마커의 크기 조절
+    },
     label: {
       text: label,
-      // color: index === 0 ? "black" : "yellow",
-      fontWeight: "bold",
     },
     zIndex: zIndex,
   });
 
+  
   return marker;
 }
+function getArrivalTimePeriod(arrivalTime: string): number {
+  const hours = parseInt(arrivalTime.split(":")[0]);
 
+  if (hours >= 0 && hours <= 11) { //~12시
+    return 1;
+  } else if (hours >= 12 && hours <= 14) { //12~15시
+    return 2;
+  } else if (hours >= 15 && hours <= 17) { //15~18시
+    return 3;
+  } else{ //18시 ~
+    return 4;
+  }
+}
+
+function getMarkerColor(num: number): string {
+  switch (num) {
+    case 1:
+      return "red";
+    case 2:
+      return "orange";
+    case 3:
+      return "yellow";
+    case 4:
+      return "#3ADF00";
+    default:
+      return "black"; // 기본값 설정
+  }
+}
 
 
 
