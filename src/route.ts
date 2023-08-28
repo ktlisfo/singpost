@@ -150,8 +150,6 @@ function createMarker(
 ): google.maps.Marker {
   const zIndex = index === 0 ? orderDataList.length : orderDataList.length - index;
   const markerColor = getMarkerColor(timePeriodColor);
-
-  console.log(label);
   
   const marker = new google.maps.Marker({
     position: new google.maps.LatLng(orderDataList[index].latitude, orderDataList[index].longitude),
