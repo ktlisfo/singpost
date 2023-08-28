@@ -5,5 +5,5 @@ import"./modulepreload-polyfill.c7c6310f.js";const f=new URLSearchParams(window.
   <strong>- Items: </strong>${e.box_num}<br>
   <strong>- Total Weight: </strong>${e.order_volume}<br>
   <strong>- Requested time from: </strong>${e.open_time}<br>
-  <strong>- Request time to: </strong>${e.close_time}<br>
+  <strong>- Requested time to: </strong>${e.close_time}<br>
   `}function v(e){let t=0;const o=e.routes[0];if(!!o){for(let n=0;n<o.legs.length;n++)t+=o.legs[n].distance.value;t=t/1e3,document.getElementById("total").innerHTML=t+" km"}}window.initMap=b;
