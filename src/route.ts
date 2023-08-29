@@ -37,7 +37,7 @@ async function readJSON(url: string): Promise<OrderData[]> {
 
         const latitude = parseFloat(Y);
         const longitude = parseFloat(X);
-        const zipCode = ZIP_CODE;
+        const zip_code = ZIP_CODE;
         const address = ADDRESS_FULL;
         const open_time = parseInt(OPEN_TIME);
         const close_time = parseInt(CLOSE_TIME);
@@ -47,7 +47,7 @@ async function readJSON(url: string): Promise<OrderData[]> {
         const dwell_time = parseInt(EST_PROC_TIME);
 
         return {
-          latitude, longitude, zipCode, address, open_time, close_time,
+          latitude, longitude, zip_code, address, open_time, close_time,
           order_volume, box_num, arrival_time, dwell_time
         };
       });
@@ -214,7 +214,6 @@ function createContent(data: OrderData): string {
   <strong>- Requested time from: </strong>${data.open_time}<br>
   <strong>- Requested time to: </strong>${data.close_time}<br>
   `;
-
   return contentFormat;
 }
 
