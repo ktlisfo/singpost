@@ -9,6 +9,7 @@ console.log(`carID : ${carId}`);
 interface OrderData {
   latitude: number;
   longitude: number;
+  zip_code: string;
   address: string;
   open_time: number;
   close_time: number;
@@ -30,12 +31,13 @@ async function readJSON(url: string): Promise<OrderData[]> {
       .filter((record: any) => record.CAR_NUM === carId)
       .map((record: any) => {
         const {
-          Y, X, ADDRESS_FULL, OPEN_TIME, CLOSE_TIME, ORDER_VOLUME,
+          Y, X, ZIP_CODE, ADDRESS_FULL, OPEN_TIME, CLOSE_TIME, ORDER_VOLUME,
           BOX_NUM, OPT_ARR_TIME_HM, EST_PROC_TIME
         } = record;
 
         const latitude = parseFloat(Y);
         const longitude = parseFloat(X);
+        const zipCode = ZIP_CODE;
         const address = ADDRESS_FULL;
         const open_time = parseInt(OPEN_TIME);
         const close_time = parseInt(CLOSE_TIME);
@@ -45,7 +47,7 @@ async function readJSON(url: string): Promise<OrderData[]> {
         const dwell_time = parseInt(EST_PROC_TIME);
 
         return {
-          latitude, longitude, address, open_time, close_time,
+          latitude, longitude, zipCode, address, open_time, close_time,
           order_volume, box_num, arrival_time, dwell_time
         };
       });
@@ -203,6 +205,7 @@ function getMarkerColor(num: number): string {
 
 function createContent(data: OrderData): string {
   const contentFormat = `
+  <strong>- Zipcode: </strong>${data.zip_code}<br>
   <strong>- Address: </strong>${data.address}<br>
   <strong>- Arrival Time: </strong>${data.arrival_time}<br>
   <strong>- Dwell Time: </strong>${data.dwell_time}<br>
