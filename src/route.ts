@@ -11,8 +11,8 @@ interface OrderData {
   longitude: number;
   zip_code: string;
   address: string;
-  open_time: number;
-  close_time: number;
+  open_time: string;
+  close_time: string;
   order_volume: number;
   box_num: number;
   arrival_time: string;
@@ -39,8 +39,9 @@ async function readJSON(url: string): Promise<OrderData[]> {
         const longitude = parseFloat(X);
         const zip_code = ZIP_CODE;
         const address = ADDRESS_FULL;
-        const open_time = parseInt(OPEN_TIME);
-        const close_time = parseInt(CLOSE_TIME);
+        const open_time = convertOpenTime(parseInt(OPEN_TIME));
+        
+        const close_time = convertCloseTime(parseInt(CLOSE_TIME));
         const order_volume = parseFloat(ORDER_VOLUME);
         const box_num = parseInt(BOX_NUM);
         const arrival_time = OPT_ARR_TIME_HM;
@@ -201,7 +202,34 @@ function getMarkerColor(num: number): string {
   }
 }
 
-
+function convertOpenTime(min: number): string{
+  // console.log("opentime(min): "+min);
+  if(min>=1440){
+    // console.log("opentime(hh:mm): "+ "24:00");
+    return "24:00";    
+  }else if(min == 0){
+    // console.log("opentime(hh:mm): "+ "00:00");
+    return "00:00";
+  }else{
+    const hour = min/60;
+    // console.log("opentime(hh:mm): "+ hour+":00");
+    return hour+":00";
+  }
+}
+function convertCloseTime(min: number): string{
+  // console.log("closetime(min): "+min);
+  if(min>=1440){
+    // console.log("closetime(hh:mm): "+ "23:59");
+    return "23:59";    
+  }else if(min == 0){
+    // console.log("closetime(hh:mm): "+ "00:00");
+    return "00:00";
+  }else{
+    const hour = min/60;
+    // console.log("closetime(hh:mm): "+(hour-1)+":59");
+    return (hour-1)+":59";
+  }
+}
 
 function createContent(data: OrderData): string {
   const contentFormat = `
