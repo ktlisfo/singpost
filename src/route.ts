@@ -230,6 +230,33 @@ function computeTotalDistance(result: google.maps.DirectionsResult) {
   (document.getElementById("total") as HTMLElement).innerHTML = total + " km";
 }
 
+
+const row = document.getElementById("accordian-header") as HTMLElement;
+const arrowIcon = document.querySelector(".arrow-icon") as HTMLElement;
+const sidebar = document.getElementById("sidebar") as HTMLElement;
+const map = document.getElementById("map") as HTMLElement;
+
+if (row && arrowIcon && sidebar) {
+  let isSidebarOpen = false;
+
+  row.addEventListener("click", () => {
+    if (isSidebarOpen) {
+      sidebar.style.maxHeight = "0";
+      sidebar.addEventListener("transitionend", () => {
+        sidebar.style.padding = "0";
+      }, { once: true });
+      
+    } else {
+      sidebar.style.maxHeight = "50%";
+      sidebar.style.padding = "1rem";
+    }
+    isSidebarOpen = !isSidebarOpen;
+    arrowIcon.style.transform = isSidebarOpen ? "rotate(180deg)" : "rotate(0deg)";
+  });
+} else {
+  console.error("Required elements not found");
+}
+
 declare global {
   interface Window {
     initMap: () => void;
