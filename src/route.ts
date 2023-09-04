@@ -208,10 +208,13 @@ function convertOpenTime(openTime: number): string{
   }else{
     const hour = Math.floor(openTime/60);
     const min = openTime%60;
-    if(min == 0){
-      return hour+":00";
-    }
-    return hour+":"+min;
+    // if(min == 0){
+    //   return hour+":00";
+    // }
+    // return hour+":"+min;
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+    return formattedTime;
+    // console.log(formattedTime); // "09:00"
   }
 }
 function convertCloseTime(closeTime: number): string{
@@ -222,10 +225,12 @@ function convertCloseTime(closeTime: number): string{
   }else{
     const hour = Math.floor(closeTime/60);
     const min = closeTime%60;
-    if(min == 0){
-      return hour+":00";
-    }
-    return hour+":"+min;
+    // if(min == 0){
+    //   return hour+":00";
+    // }
+    // return hour+":"+min;
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+    return formattedTime;
   }
 }
 
