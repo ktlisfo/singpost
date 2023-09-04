@@ -202,32 +202,23 @@ function getMarkerColor(num: number): string {
   }
 }
 
-function convertOpenTime(min: number): string{
-  // console.log("opentime(min): "+min);
-  if(min>=1440){
-    // console.log("opentime(hh:mm): "+ "24:00");
-    return "24:00";    
-  }else if(min == 0){
-    // console.log("opentime(hh:mm): "+ "00:00");
-    return "00:00";
-  }else{
-    const hour = min/60;
-    // console.log("opentime(hh:mm): "+ hour+":00");
-    return hour+":00";
-  }
+function convertOpenTime(openTime: number): string{
+    const hour = Math.floor(openTime/60);
+    const min = openTime%60;
+    
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`; //00:00 포맷
+    return formattedTime;
 }
-function convertCloseTime(min: number): string{
-  // console.log("closetime(min): "+min);
-  if(min>=1440){
-    // console.log("closetime(hh:mm): "+ "23:59");
+
+function convertCloseTime(closeTime: number): string{
+  if(closeTime>=1440){ //24:00일 경우, 23:59로 표시(?=인 이유: 2880도 있음)
     return "23:59";    
-  }else if(min == 0){
-    // console.log("closetime(hh:mm): "+ "00:00");
-    return "00:00";
   }else{
-    const hour = min/60;
-    // console.log("closetime(hh:mm): "+(hour-1)+":59");
-    return (hour-1)+":59";
+    const hour = Math.floor(closeTime/60);
+    const min = closeTime%60;
+
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`; //00:00 포맷
+    return formattedTime;
   }
 }
 

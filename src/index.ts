@@ -178,11 +178,6 @@ function sortFileName(fileNames: Array<string>) {
 
 // 파일명에서 날짜를 추출하는 함수
 function getDateFromFileName(fileName: string): Date {
-  //임시로 예전 데이터 무시
-  if(fileName == "20230615_2.json" || fileName == "20230828_R1_T1.json"|| fileName=="20230830_R1_T1.json"){
-    fileName = "01Jan_R1_T1"; //1월1일으로 지정
-  }
-
   const [day, month] = [
     fileName.substring(0, 2),
     fileName.substring(2, 5)
