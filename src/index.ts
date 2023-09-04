@@ -137,23 +137,86 @@ function generateDataElements(fname:string, carList:Set<string>) {
   }
 }
 
-function sortFileName(fileNames:Array<string>){
+function sortFileName(fileNames: Array<string>) {
   fileNames.sort((a, b) => {
-    const dateA = parseInt(a.substring(0, 8));
-    const numberA = parseInt(a.substring(9, a.lastIndexOf(".")));
-    const dateB = parseInt(b.substring(0, 8));
-    const numberB = parseInt(b.substring(9, b.lastIndexOf(".")));
-    if (dateA === dateB) {
-      // 날짜가 같을 경우 숫자를 비교하여 정렬
-      return numberA - numberB;
-    } else {
-      // 날짜가 다를 경우 날짜를 비교하여 정렬
-      return dateB - dateA;
+    const dateA = getDateFromFileName(a);
+    const dateB = getDateFromFileName(b);
+
+    // 먼저 날짜를 비교합니다.
+    if (dateA > dateB) {
+      return -1;
+    } else if (dateA < dateB) {
+      return 1;
     }
+
+    // 날짜가 같다면 R 뒤의 숫자를 비교합니다.
+    const rNumberA = getRNumberFromFileName(a);
+    const rNumberB = getRNumberFromFileName(b);
+
+    if (rNumberA > rNumberB) {
+      return -1;
+    } else if (rNumberA < rNumberB) {
+      return 1;
+    }
+
+    // R 뒤의 숫자도 같다면 T 뒤의 숫자를 비교합니다.
+    const tNumberA = getTNumberFromFileName(a);
+    const tNumberB = getTNumberFromFileName(b);
+
+    if (tNumberA > tNumberB) {
+      return -1;
+    } else if (tNumberA < tNumberB) {
+      return 1;
+    }
+
+    return 0;
   });
+
   console.log(fileNames);
   return fileNames;
 }
+
+// 파일명에서 날짜를 추출하는 함수
+function getDateFromFileName(fileName: string): Date {
+  //임시로 예전 데이터 무시
+  if(fileName == "20230615_2.json" || fileName == "20230828_R1_T1.json"|| fileName=="20230830_R1_T1.json"){
+    fileName = "01Jan_R1_T1"; //1월1일으로 지정
+  }
+
+  const [day, month] = [
+    fileName.substring(0, 2),
+    fileName.substring(2, 5)
+  ];
+
+  const monthMap: { [key: string]: number } = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11,
+  };
+  return new Date(2023, monthMap[month], parseInt(day));
+}
+
+// 파일명에서 R 뒤의 숫자를 추출하는 함수
+function getRNumberFromFileName(fileName: string): number {
+  const match = fileName.match(/R([0-9]+)/);
+  return match ? parseInt(match[1]) : 0;
+}
+
+// 파일명에서 T 뒤의 숫자를 추출하는 함수
+function getTNumberFromFileName(fileName: string): number {
+  const match = fileName.match(/T([0-9]+)/);
+  return match ? parseInt(match[1]) : 0;
+}
+
 
 function sortCarName(carList: Set<string>):Array<string>{
   return  Array.from(carList).sort();
