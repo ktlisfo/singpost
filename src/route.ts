@@ -202,32 +202,24 @@ function getMarkerColor(num: number): string {
   }
 }
 
-function convertOpenTime(min: number): string{
-  // console.log("opentime(min): "+min);
-  if(min>=1440){
-    // console.log("opentime(hh:mm): "+ "24:00");
-    return "24:00";    
-  }else if(min == 0){
-    // console.log("opentime(hh:mm): "+ "00:00");
+function convertOpenTime(openTime: number): string{
+  if(openTime == 0){
     return "00:00";
   }else{
-    const hour = min/60;
-    // console.log("opentime(hh:mm): "+ hour+":00");
-    return hour+":00";
+    const hour = Math.floor(openTime/60);
+    const min = openTime%60;
+    return hour+":"+min;
   }
 }
-function convertCloseTime(min: number): string{
-  // console.log("closetime(min): "+min);
-  if(min>=1440){
-    // console.log("closetime(hh:mm): "+ "23:59");
+function convertCloseTime(closeTime: number): string{
+  if(closeTime>=1440){
     return "23:59";    
-  }else if(min == 0){
-    // console.log("closetime(hh:mm): "+ "00:00");
+  }else if(closeTime == 0){
     return "00:00";
   }else{
-    const hour = min/60;
-    // console.log("closetime(hh:mm): "+(hour-1)+":59");
-    return (hour-1)+":59";
+    const hour = Math.floor(closeTime/60);
+    const min = closeTime%60;
+    return hour+":"+min;
   }
 }
 
