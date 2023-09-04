@@ -203,33 +203,21 @@ function getMarkerColor(num: number): string {
 }
 
 function convertOpenTime(openTime: number): string{
-  if(openTime == 0){
-    return "00:00";
-  }else{
     const hour = Math.floor(openTime/60);
     const min = openTime%60;
-    // if(min == 0){
-    //   return hour+":00";
-    // }
-    // return hour+":"+min;
-    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+    
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`; //00:00 포맷
     return formattedTime;
-    // console.log(formattedTime); // "09:00"
-  }
 }
+
 function convertCloseTime(closeTime: number): string{
-  if(closeTime>=1440){
+  if(closeTime>=1440){ //24:00일 경우, 23:59로 표시(?=인 이유: 2880도 있음)
     return "23:59";    
-  }else if(closeTime == 0){
-    return "00:00";
   }else{
     const hour = Math.floor(closeTime/60);
     const min = closeTime%60;
-    // if(min == 0){
-    //   return hour+":00";
-    // }
-    // return hour+":"+min;
-    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+
+    const formattedTime = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`; //00:00 포맷
     return formattedTime;
   }
 }
