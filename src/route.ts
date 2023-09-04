@@ -208,6 +208,9 @@ function convertOpenTime(openTime: number): string{
   }else{
     const hour = Math.floor(openTime/60);
     const min = openTime%60;
+    if(min == 0){
+      return hour+":00";
+    }
     return hour+":"+min;
   }
 }
@@ -219,6 +222,9 @@ function convertCloseTime(closeTime: number): string{
   }else{
     const hour = Math.floor(closeTime/60);
     const min = closeTime%60;
+    if(min == 0){
+      return hour+":00";
+    }
     return hour+":"+min;
   }
 }
