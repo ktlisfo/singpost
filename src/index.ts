@@ -84,38 +84,34 @@ function generateJSONElements(jsonList: Array<string>): DocumentFragment{
     //link container
     const div = document.createElement('div');
     div.className = 'tree-nav__item';
+
     
     //all-route link
-    const ALLROUTE_BASE_URL = "./data/all-route/"
+    const BASE_URL = "./data/all-route/"
     const link = document.createElement('a');
     link.className = 'tree-nav__item';
-    const url = ALLROUTE_BASE_URL + fname.replace("json", "html");
-    console.log("all route url: "+ url);
+    const url = BASE_URL + fname.replace("json", "html");
+    console.log("href url: "+ url);
     link.href = url;
     link.textContent = "All Route";
     div.appendChild(link);
-    
-     //all-route-by-car
+
+    //all-route-by-car
     const BY_CAR_BASE_URL = "./data/all-route-by-car/"
     const bycar_url = BY_CAR_BASE_URL + fname.replace(".json", "_by_CAR.html");
     console.log("bycar url: "+ bycar_url);
 
-    const bycar_link = document.createElement('a');
+    fetch(bycar_url)
+      .then((response) => {
+        if(response.ok){
+          const bycar_link = document.createElement('a');
           bycar_link.className = 'tree-nav__item';
           bycar_link.href = bycar_url;
           bycar_link.textContent = "All Route By Car";
           div.appendChild(bycar_link);
-    // fetch(bycar_url)
-    //   .then((response) => {
-    //     if(response.ok){
-    //       const bycar_link = document.createElement('a');
-    //       bycar_link.className = 'tree-nav__item';
-    //       bycar_link.href = bycar_url;
-    //       bycar_link.textContent = "All Route By Car";
-    //       div.appendChild(bycar_link);
-    //     }
-    //   });
-    
+        }
+      });
+  
     details.appendChild(div);
     details.appendChild(summary);
     fragment.appendChild(details);
@@ -254,7 +250,6 @@ readJSONList()
     // 오류 처리
     console.error('Error:', error);
   });
-
 
 
 
