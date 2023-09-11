@@ -7,6 +7,7 @@ console.log(`fname: ${fname}`);
 console.log(`carID : ${carId}`);
 
 interface OrderData {
+  visit_order:number;
   latitude: number;
   longitude: number;
   zip_code: string;
@@ -31,10 +32,11 @@ async function readJSON(url: string): Promise<OrderData[]> {
       .filter((record: any) => record.CAR_NUM === carId)
       .map((record: any) => {
         const {
-          Y, X, ZIP_CODE, ADDRESS_FULL, OPEN_TIME, CLOSE_TIME, ORDER_VOLUME,
+          VISIT_ORDER, Y, X, ZIP_CODE, ADDRESS_FULL, OPEN_TIME, CLOSE_TIME, ORDER_VOLUME,
           BOX_NUM, OPT_ARR_TIME_HM, EST_PROC_TIME
         } = record;
 
+        const visit_order = parseInt(VISIT_ORDER);
         const latitude = parseFloat(Y);
         const longitude = parseFloat(X);
         const zip_code = ZIP_CODE;
@@ -48,7 +50,7 @@ async function readJSON(url: string): Promise<OrderData[]> {
         const dwell_time = parseInt(EST_PROC_TIME);
 
         return {
-          latitude, longitude, zip_code, address, open_time, close_time,
+          visit_order, latitude, longitude, zip_code, address, open_time, close_time,
           order_volume, box_num, arrival_time, dwell_time
         };
       });
@@ -58,17 +60,19 @@ async function readJSON(url: string): Promise<OrderData[]> {
   }
 }
 
+
+
+
 async function initMap(): Promise<void> {
   const map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
     zoom: 4,
   });
-
   const infoWindow = new google.maps.InfoWindow(); // infoWindow 생성
-
+  const markers: google.maps.Marker[] = [];
   try {
     const list = await readJSON(`/singpost/data/input-data/${fname}`);
     if (list.length > 0) {
-      displayRoute(list, map, infoWindow); // infoWindow 전달
+     displayRoute(list, map, infoWindow, markers); // infoWindow 전달
     } else {
       console.error('데이터를 불러오지 못했습니다.');
     }
@@ -78,81 +82,123 @@ async function initMap(): Promise<void> {
 }
 
 
-function displayRoute(list: OrderData[], map: google.maps.Map, infoWindow: google.maps.InfoWindow): void {
+function displayRoute(list: OrderData[], map: google.maps.Map, infoWindow: google.maps.InfoWindow, markers: google.maps.Marker[]): void {
   const alphabetLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-  const directionsRenderer = new google.maps.DirectionsRenderer({
-    draggable: false,
-    map,
-    panel: document.getElementById("panel") as HTMLElement,
-    suppressMarkers: false,
-    suppressInfoWindows: true,
-    markerOptions: {
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        fillColor: 'white',
-        fillOpacity: 1,
-        strokeWeight: 3,
-        strokeColor: 'blue',
-        scale: 5,
-      },
-      zIndex: 0,
-    },
-  });
+   // Zoom and center map automatically by stations (each station will be in visible map area)
+    var lngs = list.map(function(point) { return point.longitude; });
+    var lats = list.map(function(point) { return point.latitude; });
+    map.fitBounds({
+        west: Math.min.apply(null, lngs),
+        east: Math.max.apply(null, lngs),
+        north: Math.min.apply(null, lats),
+        south: Math.max.apply(null, lats),
+    });
 
-  directionsRenderer.addListener("directions_changed", () => {
-    const directions = directionsRenderer.getDirections();
-    if (directions) {
-      computeTotalDistance(directions);
-    }
-  });
+     // Divide route to several parts because max stations limit is 25 (23 waypoints + 1 origin + 1 destination)
+     for (var i = 0, parts:OrderData[][] = [], max = 25 - 1; i < list.length; i = i + max){
+      parts.push(list.slice(i, i + max + 1));
+     }
 
-  const waypoints: google.maps.DirectionsWaypoint[] = [];
-  list.slice(1, list.length - 1).forEach((data: OrderData) => {
-    const waypoint: google.maps.DirectionsWaypoint = {
-      location: new google.maps.LatLng(data.latitude, data.longitude),
+     const directionsService = new google.maps.DirectionsService();
+
+     const waypoints: google.maps.DirectionsWaypoint[] = [];
+     list.slice(1, list.length - 1).forEach((data: OrderData) => {
+       const waypoint: google.maps.DirectionsWaypoint = {
+         location: new google.maps.LatLng(data.latitude, data.longitude),
+       };
+       waypoints.push(waypoint);
+     });
+   
+     
+
+  // Send requests to service to get route (for stations count <= 25 only one request will be sent)
+  for (var i = 0; i < parts.length; i++) {
+    // Waypoints does not include first station (origin) and last station (destination)
+    const waypoints: google.maps.DirectionsWaypoint[] = [];
+    parts[i].slice(1, list.length - 1).forEach((data: OrderData) => {
+      const waypoint: google.maps.DirectionsWaypoint = {
+        location: new google.maps.LatLng(data.latitude, data.longitude),
+      };
+      waypoints.push(waypoint);
+    });
+
+    const directionsRequest = {
+      origin: { lat: parts[i][0].latitude, lng: parts[i][0].longitude },
+      destination: { lat: parts[i][parts[i].length - 1].latitude, lng: parts[i][parts[i].length - 1].longitude },
+      waypoints: waypoints,
+      travelMode: google.maps.TravelMode.DRIVING,
+      avoidTolls: true
     };
-    waypoints.push(waypoint);
-  });
 
-  const directionsRequest = {
-    origin: { lat: list[0].latitude, lng: list[0].longitude },
-    destination: { lat: list[list.length - 1].latitude, lng: list[list.length - 1].longitude },
-    waypoints: waypoints,
-    travelMode: google.maps.TravelMode.DRIVING,
-    avoidTolls: true
-  };
+    // Send request
+    directionsService.route(directionsRequest, (response, status) => {
+      if (status === google.maps.DirectionsStatus.OK && response) {
 
-  const directionsService = new google.maps.DirectionsService();
-  directionsService.route(directionsRequest, (response, status) => {
-    if (status === google.maps.DirectionsStatus.OK && response) {
-      directionsRenderer.setDirections(response);
-      list.forEach((orderData, index) => { // 수정된 부분
-        const label = index === 0 ? "A" : alphabetLabels[index];
-        const markerColor = getArrivalTimePeriod(list[index].arrival_time);
-        const marker = createMarker(list, label, index, map, markerColor); // 수정된 부분
-        const content = createContent(orderData); // 수정된 부분
+        var renderer = new google.maps.DirectionsRenderer;
+      renderer.setMap(map);
+      renderer.setOptions({ suppressMarkers: true, preserveViewport: true });
+      renderer.setDirections(response);
 
-        marker.addListener('click', () => {
-          infoWindow.setContent(content);
-          infoWindow.open(map, marker);
-        });
+      var directionsRenderer = new google.maps.DirectionsRenderer({
+        draggable: false,
+        map,
+        // panel: document.getElementById("panel") as HTMLElement,
+        suppressMarkers: false,
+        preserveViewport: true,
+        suppressInfoWindows: true,
+        markerOptions: {
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: 'white',
+            fillOpacity: 1,
+            strokeWeight: 3,
+            strokeColor: 'blue',
+            scale: 5,
+          },
+          zIndex: 0,
+        },
       });
-    } else {
-      console.error('경로 요청 실패:', status);
-    }
-  });
-}
+      directionsRenderer.addListener("directions_changed", () => {
+        const directions = directionsRenderer.getDirections();
+        if (directions) {
+          computeTotalDistance(directions);
+        }
+      });
+
+        directionsRenderer.setDirections(response);
+        list.forEach((orderData, index) => { 
+          // const label = index === 0 ? "A" : alphabetLabels[index];
+          const label = index+1+"";
+          const markerColor = getMarkerColor(list[index].arrival_time);
+          const marker = createMarker(list, label, index, map, markerColor); 
+          const content = createWindowContent(orderData); 
+  
+          markers.push(marker);
+          marker.addListener('click', () => {
+            infoWindow.setContent(content);
+            infoWindow.open(map, marker);
+          });
+        });
+
+        makeListElement(list, map, infoWindow, markers);
+      } else {
+        console.error('index: ', i);;
+        console.error('parts: ', parts);
+        console.error('경로 요청 실패:', status);
+      }
+    });
+  }
+};
 
 function createMarker(
   orderDataList: OrderData[],
   label: string,
   index: number,
   map: google.maps.Map,
-  timePeriodColor: number
+  markerColor: string
 ): google.maps.Marker {
   const zIndex = index === 0 ? orderDataList.length : orderDataList.length - index;
-  const markerColor = getMarkerColor(timePeriodColor);
   
   const marker = new google.maps.Marker({
     position: new google.maps.LatLng(orderDataList[index].latitude, orderDataList[index].longitude),
@@ -170,35 +216,19 @@ function createMarker(
     zIndex: zIndex,
   });
 
-  
   return marker;
 }
-function getArrivalTimePeriod(arrivalTime: string): number {
+
+function getMarkerColor(arrivalTime: string): string {
   const hours = parseInt(arrivalTime.split(":")[0]);
-
   if (hours >= 0 && hours <= 11) { //~12시
-    return 1;
+    return "red";
   } else if (hours >= 12 && hours <= 14) { //12~15시
-    return 2;
+    return "orange";
   } else if (hours >= 15 && hours <= 17) { //15~18시
-    return 3;
+    return "yellow";
   } else{ //18시 ~
-    return 4;
-  }
-}
-
-function getMarkerColor(num: number): string {
-  switch (num) {
-    case 1:
-      return "red";
-    case 2:
-      return "orange";
-    case 3:
-      return "yellow";
-    case 4:
-      return "#3ADF00";
-    default:
-      return "black"; // 기본값 설정
+    return "#3ADF00";
   }
 }
 
@@ -222,7 +252,7 @@ function convertCloseTime(closeTime: number): string{
   }
 }
 
-function createContent(data: OrderData): string {
+function createWindowContent(data: OrderData): string {
   const contentFormat = `
   <strong>- Zipcode: </strong>${data.zip_code}<br>
   <strong>- Address: </strong>${data.address}<br>
@@ -233,6 +263,26 @@ function createContent(data: OrderData): string {
   <strong>- Requested time from: </strong>${data.open_time}<br>
   <strong>- Requested time to: </strong>${data.close_time}<br>
   `;
+  return contentFormat;
+}
+
+function createListHeaderContent(data: OrderData): string{
+  const contentFormat = `
+  (${data.zip_code})<br>
+  ${data.address}<br>
+  `
+  return contentFormat;
+}
+
+function createListContent(data: OrderData): string{
+  const contentFormat = `
+  - Arrival Time: ${data.arrival_time}<br>
+  - Dwell Time: ${data.dwell_time}<br>
+  - Items: ${data.box_num}<br>
+  - Total Weight: ${data.order_volume}<br>
+  - Requested time from: ${data.open_time}<br>
+  - Requested time to: ${data.close_time}<br>
+  `
   return contentFormat;
 }
 
@@ -249,11 +299,64 @@ function computeTotalDistance(result: google.maps.DirectionsResult) {
   (document.getElementById("total") as HTMLElement).innerHTML = total + " km";
 }
 
+function makeListElement(data: OrderData[], map: google.maps.Map, infoWindow: google.maps.InfoWindow, markers: google.maps.Marker[]){
+  const dataList = document.getElementById("data-list");
+  if (dataList) {
+    dataList.innerHTML = "";
+    data.forEach(item => {
+        const listItem = document.createElement("li");
+        listItem.className = "data-item";
+
+        const itemHeader = document.createElement("div");
+        itemHeader.className = "item-header";
+
+        // 동그라미 (index) 추가
+        const indexCircle = document.createElement("div");
+        indexCircle.className = "index-circle";
+        indexCircle.style.backgroundColor = getMarkerColor(data[item.visit_order].arrival_time);
+        const index = document.createElement("span");
+        index.textContent = (item.visit_order+1).toString();
+        indexCircle.appendChild(index);
+        
+        // zipcode, address 데이터 추가
+        const headerInfo = document.createElement("div");
+        headerInfo.className = "header-info";
+        headerInfo.innerHTML = createListHeaderContent(item);
+        
+        itemHeader.appendChild(indexCircle);
+        itemHeader.appendChild(headerInfo);
+        
+        listItem.appendChild(itemHeader);
+
+        const dataInfo = document.createElement("div");
+        dataInfo.innerHTML = createListContent(item);
+        listItem.appendChild(dataInfo);
+
+        dataList.appendChild(listItem);
+
+        // 아이템 헤더 클릭 이벤트 추가
+      itemHeader.addEventListener("click", () => {
+        const markerIndex = item.visit_order; 
+        const marker = markers[markerIndex];
+
+        if (marker) {
+          //marker 최상단으로 올리기.
+          markers.forEach((marker, index) => {
+            marker.setZIndex(markers.length - index);
+          });
+          marker.setZIndex(markers.length+1);
+          // InfoWindow 열기
+          infoWindow.setContent(createWindowContent(item));
+          infoWindow.open(map, marker);
+        }
+      });
+    });
+  }
+}
 
 const row = document.getElementById("accordian-header") as HTMLElement;
 const arrowIcon = document.querySelector(".arrow-icon") as HTMLElement;
 const sidebar = document.getElementById("sidebar") as HTMLElement;
-const map = document.getElementById("map") as HTMLElement;
 
 if (row && arrowIcon && sidebar) {
   let isSidebarOpen = false;
