@@ -22,6 +22,9 @@ const deployWebDataDirectory = './dist/data/all-route'; // 배포할 경로
 const sourceInputDataDirectory = './data/input-data';
 const deployInputDataDirectory = './dist/data/input-data';
 
+const sourceByCarDataDirectory = './data/all-route-by-car';
+const deployByCarDataDirectory = './dist/data/all-route-by-car';
+
 function deployFiles(sourceDirectory, deployDirectory) {
   fs.readdir(sourceDirectory, (err, files) => {
     if (err) {
