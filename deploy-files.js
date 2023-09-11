@@ -55,3 +55,4 @@ function deployFiles(sourceDirectory, deployDirectory) {
 // 스크립트 실행
 deployFiles(sourceWebDataDirectory, deployWebDataDirectory);
 deployFiles(sourceInputDataDirectory, deployInputDataDirectory);
+deployFiles(sourceByCarDataDirectory, deployByCarDataDirectory);
