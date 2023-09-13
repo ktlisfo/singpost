@@ -19,6 +19,7 @@ interface OrderData {
   arrival_time: string;
   dwell_time: number;
   nm_count: number;
+  box_count: number;
 }
 
 async function readJSON(url: string): Promise<OrderData[]> {
@@ -34,7 +35,7 @@ async function readJSON(url: string): Promise<OrderData[]> {
       .map((record: any) => {
         const {
           VISIT_ORDER, Y, X, ZIP_CODE, ADDRESS_FULL, OPEN_TIME, CLOSE_TIME, ORDER_VOLUME,
-          BOX_NUM, OPT_ARR_TIME_HM, EST_PROC_TIME, NM_COUNT
+          BOX_NUM, OPT_ARR_TIME_HM, EST_PROC_TIME, NM_COUNT, BOX_COUNT
         } = record;
 
         const visit_order = parseInt(VISIT_ORDER);
@@ -50,10 +51,11 @@ async function readJSON(url: string): Promise<OrderData[]> {
         const arrival_time = OPT_ARR_TIME_HM;
         const dwell_time = parseInt(EST_PROC_TIME);
         const nm_count = parseInt(NM_COUNT);
+        const box_count = parseInt(BOX_COUNT);
 
         return {
           visit_order, latitude, longitude, zip_code, address, open_time, close_time,
-          order_volume, box_num, arrival_time, dwell_time, nm_count
+          order_volume, box_num, arrival_time, dwell_time, nm_count, box_count
         };
       });
   } catch (error) {
@@ -257,7 +259,8 @@ function convertCloseTime(closeTime: number): string{
 function createWindowContent(data: OrderData): string {
   const contentFormat = `
   <strong>- Zipcode: </strong>${data.zip_code}<br>
-  <strong>- Location: </strong>${data.nm_count}<br>
+  <strong>- Customer: </strong>${data.nm_count}<br>
+  <strong>- Total Item: </strong>${data.box_count}<br>
   `;
   return contentFormat;
 }
