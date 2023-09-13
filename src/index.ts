@@ -91,7 +91,7 @@ function generateJSONElements(jsonList: Array<string>): DocumentFragment{
     const link = document.createElement('a');
     link.className = 'tree-nav__item';
     const url = BASE_URL + fname.replace("json", "html");
-    console.log("href url: "+ url);
+    console.log("all route url: "+ url);
     link.href = url;
     link.textContent = "All Route";
     div.appendChild(link);

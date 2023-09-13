@@ -303,7 +303,7 @@ function makeListElement(data: OrderData[], map: google.maps.Map, infoWindow: go
   const dataList = document.getElementById("data-list");
   if (dataList) {
     dataList.innerHTML = "";
-    data.forEach(item => {
+    data.forEach((item, i) => {
         const listItem = document.createElement("li");
         listItem.className = "data-item";
 
@@ -313,9 +313,9 @@ function makeListElement(data: OrderData[], map: google.maps.Map, infoWindow: go
         // 동그라미 (index) 추가
         const indexCircle = document.createElement("div");
         indexCircle.className = "index-circle";
-        indexCircle.style.backgroundColor = getMarkerColor(data[item.visit_order].arrival_time);
+        indexCircle.style.backgroundColor = getMarkerColor(data[i].arrival_time);
         const index = document.createElement("span");
-        index.textContent = (item.visit_order+1).toString();
+        index.textContent = (i+1).toString();
         indexCircle.appendChild(index);
         
         // zipcode, address 데이터 추가
@@ -336,8 +336,8 @@ function makeListElement(data: OrderData[], map: google.maps.Map, infoWindow: go
 
         // 아이템 헤더 클릭 이벤트 추가
       itemHeader.addEventListener("click", () => {
-        const markerIndex = item.visit_order; 
-        const marker = markers[markerIndex];
+        // const markerIndex = index; 
+        const marker = markers[i];
 
         if (marker) {
           //marker 최상단으로 올리기.
