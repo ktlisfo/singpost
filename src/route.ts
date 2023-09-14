@@ -358,7 +358,7 @@ const arrowIcon = document.querySelector(".arrow-icon") as HTMLElement;
 const sidebar = document.getElementById("sidebar") as HTMLElement;
 
 if (row && arrowIcon && sidebar) {
-  let isSidebarOpen = false;
+  let isSidebarOpen = true;
 
   row.addEventListener("click", () => {
     if (isSidebarOpen) {
