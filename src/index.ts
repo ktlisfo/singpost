@@ -164,9 +164,19 @@ function sortFileName(fileNames: Array<string>) {
       return 1;
     }
 
-    // 날짜가 같다면 R 뒤의 숫자를 비교합니다.
-    const rNumberA = getRNumberFromFileName(a);
-    const rNumberB = getRNumberFromFileName(b);
+    //R, E를 구분합니다.
+    const categoryA = getER_FromFileName(a);
+    const categoryB = getER_FromFileName(b);
+
+    if(categoryA > categoryB){
+      return 1;
+    }else if(categoryA < categoryB){
+      return -1;
+    }
+
+    // 날짜가 같다면 R 또는 E 뒤의 숫자를 비교합니다.
+    const rNumberA = (categoryA==0)?getENumberFromFileName(a):getRNumberFromFileName(a);
+    const rNumberB = (categoryB==0)?getENumberFromFileName(b):getRNumberFromFileName(b);
 
     if (rNumberA > rNumberB) {
       return -1;
@@ -174,7 +184,8 @@ function sortFileName(fileNames: Array<string>) {
       return 1;
     }
 
-    // R 뒤의 숫자도 같다면 T 뒤의 숫자를 비교합니다.
+    // R 또는 E 뒤의 숫자도 같다면 T 뒤의 숫자를 비교합니다.
+
     const tNumberA = getTNumberFromFileName(a);
     const tNumberB = getTNumberFromFileName(b);
 
@@ -183,6 +194,17 @@ function sortFileName(fileNames: Array<string>) {
     } else if (tNumberA < tNumberB) {
       return 1;
     }
+
+    //T 뒤의 숫자도 같다면 P 뒤의 숫자를 비교합니다.
+    const pNumberA = getPNumberFromFileName(a);
+    const pNumberB = getPNumberFromFileName(b);
+
+    if (pNumberA > pNumberB) {
+      return -1;
+    } else if (pNumberA < pNumberB) {
+      return 1;
+    }
+
 
     return 0;
   });
@@ -215,9 +237,25 @@ function getDateFromFileName(fileName: string): Date {
   return new Date(2023, monthMap[month], parseInt(day));
 }
 
+//파일명에서 R또는 E를 추출하는 함수
+function getER_FromFileName(fileName: string): number{
+  console.log("E or R: "+ fileName[6]);
+  if(fileName[6] == 'E'){
+    return 0;
+  }else{
+    return 1;
+  }
+}
+
 // 파일명에서 R 뒤의 숫자를 추출하는 함수
 function getRNumberFromFileName(fileName: string): number {
   const match = fileName.match(/R([0-9]+)/);
+  return match ? parseInt(match[1]) : 0;
+}
+
+// 파일명에서 E 뒤의 숫자를 추출하는 함수
+function getENumberFromFileName(fileName: string): number {
+  const match = fileName.match(/E([0-9]+)/);
   return match ? parseInt(match[1]) : 0;
 }
 
@@ -227,6 +265,11 @@ function getTNumberFromFileName(fileName: string): number {
   return match ? parseInt(match[1]) : 0;
 }
 
+// 파일명에서 T 뒤의 숫자를 추출하는 함수
+function getPNumberFromFileName(fileName: string): number {
+  const match = fileName.match(/P([0-9]+)/);
+  return match ? parseInt(match[1]) : 0;
+}
 
 function sortCarName(carList: Set<string>):Array<string>{
   return  Array.from(carList).sort();
