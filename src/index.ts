@@ -290,7 +290,6 @@ readJSONList()
     }
   })
   .catch(error => {
-    // 오류 처리
     console.error('Error:', error);
   });
 
