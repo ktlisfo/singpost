@@ -207,7 +207,7 @@ function createMarker(
   e: number, //긴급주문
 ): google.maps.Marker {
   const zIndex = index === 0 ? orderDataList.length : orderDataList.length - index;
-  const strokeColor = (e==1)?"red":"black";
+  const strokeColor = (e==1)?"blue":"black";
   
   const marker = new google.maps.Marker({
     position: new google.maps.LatLng(orderDataList[index].latitude, orderDataList[index].longitude),
@@ -314,12 +314,14 @@ function makeListElement(data: OrderData[], map: google.maps.Map, infoWindow: go
 
         const itemHeader = document.createElement("div");
         itemHeader.className = "item-header";
+        const headerColor = (data[i].e==1)? "#EBF7FF":"#EEEEEE";
+        itemHeader.style.backgroundColor = headerColor;
 
         // 동그라미 (index) 추가
         const indexCircle = document.createElement("div");
         indexCircle.className = "index-circle";
         indexCircle.style.backgroundColor = getMarkerColor(data[i].arrival_time);
-        const strokeColor = (data[i].e==1)?"red":"black";
+        const strokeColor = (data[i].e==1)?"blue":"black";
         indexCircle.style.borderColor = strokeColor;
         const index = document.createElement("span");
         index.textContent = (i+1).toString();
