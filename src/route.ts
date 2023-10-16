@@ -208,6 +208,7 @@ function createMarker(
 ): google.maps.Marker {
   const zIndex = index === 0 ? orderDataList.length : orderDataList.length - index;
   const strokeColor = (e==1)?"blue":"black";
+  const strokeWeight = (e==1)?3:2;
   
   const marker = new google.maps.Marker({
     position: new google.maps.LatLng(orderDataList[index].latitude, orderDataList[index].longitude),
@@ -216,7 +217,7 @@ function createMarker(
       path: google.maps.SymbolPath.CIRCLE,
       fillColor: markerColor,
       fillOpacity: 1,
-      strokeWeight: 3,
+      strokeWeight: strokeWeight,
       strokeColor: strokeColor,
       scale: 10, // 마커의 크기 조절
     },
