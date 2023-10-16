@@ -20,6 +20,7 @@ interface OrderData {
   dwell_time: number;
   nm_count: number;
   box_count: number;
+  e: number;
 }
 
 async function readJSON(url: string): Promise<OrderData[]> {
@@ -35,7 +36,7 @@ async function readJSON(url: string): Promise<OrderData[]> {
       .map((record: any) => {
         const {
           VISIT_ORDER, Y, X, ZIP_CODE, ADDRESS_FULL, OPEN_TIME, CLOSE_TIME, ORDER_VOLUME,
-          BOX_NUM, OPT_ARR_TIME_HM, EST_PROC_TIME, NM_COUNT, BOX_COUNT
+          BOX_NUM, OPT_ARR_TIME_HM, EST_PROC_TIME, NM_COUNT, BOX_COUNT, E
         } = record;
 
         const visit_order = parseInt(VISIT_ORDER);
@@ -53,9 +54,11 @@ async function readJSON(url: string): Promise<OrderData[]> {
         const nm_count = parseInt(NM_COUNT);
         const box_count = parseInt(BOX_COUNT);
 
+        const e = parseInt(E);
+
         return {
           visit_order, latitude, longitude, zip_code, address, open_time, close_time,
-          order_volume, box_num, arrival_time, dwell_time, nm_count, box_count
+          order_volume, box_num, arrival_time, dwell_time, nm_count, box_count, e
         };
       });
   } catch (error) {
@@ -175,7 +178,7 @@ function displayRoute(list: OrderData[], map: google.maps.Map, infoWindow: googl
           // const label = index === 0 ? "A" : alphabetLabels[index];
           const label = index+1+"";
           const markerColor = getMarkerColor(list[index].arrival_time);
-          const marker = createMarker(list, label, index, map, markerColor); 
+          const marker = createMarker(list, label, index, map, markerColor, orderData.e); 
           const content = createWindowContent(orderData); 
   
           markers.push(marker);
@@ -200,9 +203,11 @@ function createMarker(
   label: string,
   index: number,
   map: google.maps.Map,
-  markerColor: string
+  markerColor: string,
+  e: number, //긴급주문
 ): google.maps.Marker {
   const zIndex = index === 0 ? orderDataList.length : orderDataList.length - index;
+  const strokeColor = (e==1)?"red":"black";
   
   const marker = new google.maps.Marker({
     position: new google.maps.LatLng(orderDataList[index].latitude, orderDataList[index].longitude),
@@ -212,6 +217,7 @@ function createMarker(
       fillColor: markerColor,
       fillOpacity: 1,
       strokeWeight: 2,
+      strokeColor: strokeColor,
       scale: 10, // 마커의 크기 조절
     },
     label: {
@@ -226,13 +232,13 @@ function createMarker(
 function getMarkerColor(arrivalTime: string): string {
   const hours = parseInt(arrivalTime.split(":")[0]);
   if (hours >= 0 && hours <= 11) { //~12시
-    return "red";
+    return "#FFA7A7"; //red
   } else if (hours >= 12 && hours <= 14) { //12~15시
-    return "orange";
+    return "#FAED7D"; //yellow
   } else if (hours >= 15 && hours <= 17) { //15~18시
-    return "yellow";
+    return "#B7F0B1";
   } else{ //18시 ~
-    return "#3ADF00";
+    return "#6799FF";//blue
   }
 }
 
