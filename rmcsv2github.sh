@@ -24,4 +24,4 @@ git add ./data/*
 git commit -m "Remove files"
 
 # Git 푸시
-git push
+# git push
