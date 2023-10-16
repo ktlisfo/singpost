@@ -319,6 +319,8 @@ function makeListElement(data: OrderData[], map: google.maps.Map, infoWindow: go
         const indexCircle = document.createElement("div");
         indexCircle.className = "index-circle";
         indexCircle.style.backgroundColor = getMarkerColor(data[i].arrival_time);
+        const strokeColor = (data[i].e==1)?"red":"black";
+        indexCircle.style.borderColor = strokeColor;
         const index = document.createElement("span");
         index.textContent = (i+1).toString();
         indexCircle.appendChild(index);
