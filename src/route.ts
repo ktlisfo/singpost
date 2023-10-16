@@ -216,7 +216,7 @@ function createMarker(
       path: google.maps.SymbolPath.CIRCLE,
       fillColor: markerColor,
       fillOpacity: 1,
-      strokeWeight: 2,
+      strokeWeight: 3,
       strokeColor: strokeColor,
       scale: 10, // 마커의 크기 조절
     },
