@@ -46,16 +46,48 @@ function readJSON(url): Promise<Set<string>> {
     });
 }
 
+// dateDetails를 관리하는 Map
+const dateDetailsMap = new Map();
+
 function generateJSONElements(jsonList: Array<string>): DocumentFragment{
   const fragment = document.createDocumentFragment();
   jsonList.forEach((fname) => {
-    //expanable
-    const details = document.createElement('details');
-    details.className = 'tree-nav__item is-expandable';
+    const dateStr = fname.slice(0,5); //ex)17Oct;
 
-    //date
+    if(!dateDetailsMap.has(dateStr)){
+      // 해당 날짜의 details가 아직 생성되지 않았다면 생성
+
+      //날짜 expandable 묶음
+      const dateDetails = document.createElement('details');
+      dateDetails.className = 'date-details';
+
+      //날짜 summary
+      const dateSummary = document.createElement('summary');
+      dateSummary.className = 'date-summary';
+      dateSummary.textContent = dateStr;
+
+      //파일 명 details 들어갈 div
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'date-item';
+
+      dateDetails.appendChild(dateDiv);
+      dateDetails.appendChild(dateSummary);
+
+      // 생성된 details를 Map에 추가
+      dateDetailsMap.set(dateStr, dateDetails);
+    }
+   
+    // 동일 날짜의 details에 파일 정보를 추가
+    const dateDetails = dateDetailsMap.get(dateStr);
+    const dateDiv = dateDetails.querySelector('.date-item');
+
+    //파일명 expandable 묶음
+    const details = document.createElement('details');
+    details.className = 'filename-details';//tree-nav__item is-expandable 였던 것
+
+    //파일명 summary
     const summary = document.createElement('summary');
-    summary.className = 'tree-nav__item-title';
+    summary.className = 'filename-summary'; //tree-nav__item-title 였던 것
     summary.textContent = fname.replace(".json","");
     console.log('fname: ' + fname);
 
@@ -76,20 +108,19 @@ function generateJSONElements(jsonList: Array<string>): DocumentFragment{
           console.error('JSON 읽기 오류:', error);
         });
         
-        generatedSet.add(fname);
+        generatedSet.add(fname);                              
       }
-
     });
   
     //link container
     const div = document.createElement('div');
-    div.className = 'tree-nav__item';
+    div.className = 'carname-item'; //tree-nav__item였던 것
 
     
     //all-route link
     const BASE_URL = "./data/all-route/"
     const link = document.createElement('a');
-    link.className = 'tree-nav__item';
+    link.className = 'carname-item'; //tree-nav__item였던 것
     const url = BASE_URL + fname.replace("json", "html");
     console.log("all route url: "+ url);
     link.href = url;
@@ -105,16 +136,18 @@ function generateJSONElements(jsonList: Array<string>): DocumentFragment{
       .then((response) => {
         if(response.ok){
           const bycar_link = document.createElement('a');
-          bycar_link.className = 'tree-nav__item';
+          bycar_link.className = 'carname-item';
           bycar_link.href = bycar_url;
           bycar_link.textContent = "All Route By Car";
           div.appendChild(bycar_link);
         }
       });
-  
-    details.appendChild(div);
+
     details.appendChild(summary);
-    fragment.appendChild(details);
+    details.appendChild(div);
+    dateDiv.appendChild(details);
+
+    fragment.appendChild(dateDetails);
   })
 
   return fragment;
@@ -124,32 +157,70 @@ function generateDataElements(fname:string, carList:Set<string>) {
   const BASE_URL = './route.html?';
 
   const summaryText = fname.replace(".json", ""); //찾으려는 항목
+  const dateStr = fname.slice(0,5);
 
   const treeNav = document.querySelector('.tree-nav');
-  if (treeNav && treeNav.children) {
-    // tree-nav의 자식 요소들을 순회한다.
-    for (const child of treeNav.children) {
-      if (child.tagName === 'DETAILS') {
-        const summary = child.querySelector('.tree-nav__item-title');
-        if (summary && summary.textContent === summaryText) {
-          // summary의 텍스트가 파일명과 일치하는 경우, div 태그를 찾는다.
-          const div = child.querySelector('.tree-nav__item');
-          if (div) {
-            // 해당 div 요소에 CAR_NUM 링크 요소를 추가함
-            sortCarName(carList).forEach((carNum) => {
-              //car link
-              const link = document.createElement('a');
-              link.className = 'tree-nav__item';
-              link.href = BASE_URL + 'fname=' + fname.replace(".json","") + '&car_id=' + carNum;
-              link.textContent = carNum;//차량 번호 추가
-              div.appendChild(link);
-            });
+  if (treeNav) {
+    const dateSummaries = treeNav.querySelectorAll('.date-summary');
+    for (const dateSummary of dateSummaries) {
+      if (dateSummary.textContent === dateStr) {
+        const expandableDiv =  dateSummary.previousElementSibling;
+        console.log(expandableDiv);
+        if (expandableDiv) {
+          const fileNameSummaries = expandableDiv.querySelectorAll('.filename-summary');
+          console.log(fileNameSummaries);
+          for (const filenameSummary of fileNameSummaries) {
+            if (filenameSummary.textContent === summaryText) {
+              // summary의 텍스트가 파일명과 일치하는 경우, 해당 summary 내부의 div 태그(carName을 추가할 곳)를 찾는다.
+              const div = filenameSummary.nextElementSibling;
+              if (div) {
+                // 해당 div 요소에 CAR_NUM 링크 요소를 추가함
+                sortCarName(carList).forEach((carNum) => {
+                  // car link
+                  const link = document.createElement('a');
+                  link.className = 'carname-item';
+                  link.href = BASE_URL + 'fname=' + fname.replace(".json","") + '&car_id=' + carNum;
+                  link.textContent = carNum; // 차량 번호 추가
+                  div.appendChild(link);
+                });
+              }
+              break; // 해당 요소를 찾았으므로 루프 종료
+            }
           }
-          break;
         }
       }
     }
   }
+
+  //
+  // if (treeNav) {
+  //   // tree-nav의 자식 요소들을 순회한다.
+  //   for (const child of treeNav.children) {
+  //     if (child.tagName === 'DETAILS') {
+  //       const summaries = child.querySelectorAll('.filename-summary');
+  //       for (const summary of summaries) {
+  //         if (summary.textContent === summaryText) {
+  //           // summary의 텍스트가 파일명과 일치하는 경우, 해당 summary 내부의 div 태그(carName을 추가할 곳)를 찾는다.
+  //           const div = summary.nextElementSibling;
+  //           if (div) {
+  //             // 해당 div 요소에 CAR_NUM 링크 요소를 추가함
+  //             sortCarName(carList).forEach((carNum) => {
+  //               // car link
+  //               const link = document.createElement('a');
+  //               link.className = 'carname-item';
+  //               link.href = BASE_URL + 'fname=' + fname.replace(".json","") + '&car_id=' + carNum;
+  //               link.textContent = carNum; // 차량 번호 추가
+  //               div.appendChild(link);
+  //             });
+  //           }
+  //           // break; // 해당 요소를 찾았으므로 루프 종료
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  
+//
 }
 
 function sortFileName(fileNames: Array<string>) {
